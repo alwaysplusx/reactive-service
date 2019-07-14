@@ -4,6 +4,7 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
@@ -46,7 +47,7 @@ public class UserVerticle extends AbstractVerticle {
         Router router = Router.router(vertx);
 
         router.route("/greeting")
-                .handler(ar -> ar.response().end("Hi " + ar.request().getParam("name")));
+                .handler(this::handleGreeting);
 
         router.route("/user/register")
                 .handler(this::handleUserRegister);
@@ -63,6 +64,14 @@ public class UserVerticle extends AbstractVerticle {
                         log.info("create http server listen failed");
                     }
                 });
+    }
+
+    private void handleGreeting(RoutingContext routingContext) {
+        HttpServerRequest request = routingContext.request();
+        String name = request.getParam("name");
+        log.info("begin say greeting to user {}", name);
+        HttpServerResponse response = routingContext.response();
+        response.end("Hi " + name, ar -> log.info("end say greeting！"));
     }
 
     private void handleListUsers(RoutingContext routingContext) {
